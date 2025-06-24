@@ -1,3 +1,10 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Playfair+Display:wght@400;600;700&display=swap');
+
+/* Import Remix Icon */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css');
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,6 +103,37 @@
 .event-card:hover {
   transform: translateY(-5px);
   transition: transform 0.3s ease;
+}
+
+/* Custom Tailwind configuration */
+@layer utilities {
+  .text-primary {
+    color: #1e40af;
+  }
+  
+  .bg-primary {
+    background-color: #1e40af;
+  }
+  
+  .bg-primary\/90 {
+    background-color: rgba(30, 64, 175, 0.9);
+  }
+  
+  .hover\:bg-primary\/90:hover {
+    background-color: rgba(30, 64, 175, 0.9);
+  }
+  
+  .border-primary {
+    border-color: #1e40af;
+  }
+  
+  .focus\:border-primary:focus {
+    border-color: #1e40af;
+  }
+  
+  .hover\:text-primary:hover {
+    color: #1e40af;
+  }
 }
 
 .nav-link {

@@ -8,7 +8,7 @@ import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
 // import Ministries from "./pages/Ministries";
 import Give from "./pages/Give";
-// import Contact from "./pages/Contact";
+import Contact from "./pages/Contact";
 // import Celebrate from "./pages/Celebrate";
 // import NotFound from "./pages/NotFound";
 
@@ -26,7 +26,7 @@ const App = () => (
           <Route path="/services" element={<Services />} />
           {/* <Route path="/ministries" element={<Ministries />} /> */}
           <Route path="/give" element={<Give />} />
-          {/* <Route path="/contact" element={<Contact />} /> */}
+          <Route path="/contact" element={<Contact />} />
           {/* <Route path="/celebrate" element={<Celebrate />} /> */}
           {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>
