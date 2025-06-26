@@ -55,7 +55,7 @@ const Navigation = () => {
           </div>
           <div className="hidden md:flex items-center">
             <button className="!rounded-button bg-primary text-white px-6 py-2 text-sm font-medium hover:bg-primary/90 transition-colors cursor-pointer whitespace-nowrap">
-              <Link to="/celebrate">Celebrate Me</Link>
+              <Link to="/Celebrate">Celebrate Me</Link>
             </button>
           </div>
           <div className="md:hidden flex items-center">
