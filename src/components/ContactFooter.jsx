@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const ContactFooter = () => {
     return (
@@ -14,11 +15,11 @@ const ContactFooter = () => {
                     <div>
                         <h3 className="text-xl font-bold mb-4">Quick Links</h3>
                         <ul className="space-y-2">
-                            <li><a href="/" className="text-gray-400 hover:text-white transition-colors">Home</a></li>
-                            <li><a href="/about-us" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-                            <li><a href="/services" className="text-gray-400 hover:text-white transition-colors">Services</a></li>
-                            <li><a href="/ministries" className="text-gray-400 hover:text-white transition-colors">Ministries</a></li>
-                            <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                            <li><Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
+                            <li><Link to="/about-us" className="text-gray-400 hover:text-white transition-colors">About Us</Link></li>
+                            <li><Link to="/services" className="text-gray-400 hover:text-white transition-colors">Services</Link></li>
+                            <li><Link to="/ministry" className="text-gray-400 hover:text-white transition-colors">Ministries</Link></li>
+                            <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -49,9 +50,9 @@ const ContactFooter = () => {
                 <div className="mt-12 pt-8 border-t border-gray-800 text-center px-4">
                     <p>&copy; 2025 RCCG Liberty Christian Center. All rights reserved.</p>
                     <div className="mt-4">
-                        <a href="#" className="text-gray-400 hover:text-primary mx-2">Privacy Policy</a>
+                        <Link to="/privacy-policy" className="text-gray-400 hover:text-primary mx-2">Privacy Policy</Link>
                         <span className="text-gray-400">|</span>
-                        <a href="#" className="text-gray-400 hover:text-primary mx-2">Terms of Service</a>
+                        <Link to="/terms" className="text-gray-400 hover:text-primary mx-2">Terms of Service</Link>
                     </div>
                 </div>
             </div>

@@ -45,7 +45,7 @@ const ContactFormNavigation = () => {
                 <Link to="/" className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">Home</Link>
                 <Link to="/about-us" className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">About Us</Link>
                 <Link to="/services" className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">Services</Link>
-                <Link to="/ministries" className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">Ministries</Link>
+                <Link to="/ministry" className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">Ministries</Link>
                 <Link to="/give" className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">Give</Link>
                 <Link to="/contact" className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
                   <span style={{ color: 'blue' }}><b>Contact</b></span>
@@ -74,7 +74,7 @@ const ContactFormNavigation = () => {
               <Link to="/" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Home</Link>
               <Link to="/about-us" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">About Us</Link>
               <Link to="/services" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Services</Link>
-              <Link to="/ministries" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Ministries</Link>
+              <Link to="/ministry" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Ministries</Link>
               <Link to="/give" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Give</Link>
               <Link to="/contact" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                 <span style={{ color: 'blue' }}><b>Contact</b></span>
