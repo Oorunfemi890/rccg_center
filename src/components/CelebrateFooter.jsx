@@ -16,7 +16,7 @@ const CelebrateFooter = () => {
                 <li><a href="/" className="text-gray-400 hover:text-white transition-colors">Home</a></li>
                 <li><a href="/about-us" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
                 <li><a href="/services" className="text-gray-400 hover:text-white transition-colors">Services</a></li>
-                <li><a href="/ministries" className="text-gray-400 hover:text-white transition-colors">Ministries</a></li>
+                {/* <li><a href="/ministries" className="text-gray-400 hover:text-white transition-colors">Ministries</a></li> */}
                 <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
               </ul>
             </div>

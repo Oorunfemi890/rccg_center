@@ -37,12 +37,12 @@ const Navigation = () => {
               >
                 Services
               </Link>
-              <Link
+              {/* <Link
                 to="/ministries"
                 className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium"
               >
                 Ministries
-              </Link>
+              </Link> */}
               <Link
                 to="/give"
                 className="nav-link text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium"
@@ -104,13 +104,13 @@ const Navigation = () => {
             >
               Services
             </Link>
-            <Link
+            {/* <Link
               to="/ministries"
               onClick={closeMobileMenu}
               className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
             >
               Ministries
-            </Link>
+            </Link> */}
             <Link
               to="/give"
               onClick={closeMobileMenu}
