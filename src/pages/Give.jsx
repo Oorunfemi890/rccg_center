@@ -1,4 +1,15 @@
 const Give = () => {
+  // Function to scroll to account details section
+  const scrollToAccountDetails = () => {
+    const accountSection = document.getElementById('account-details');
+    if (accountSection) {
+      accountSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
   return (
     <div className="pt-16">
       {/* Hero Section */}
@@ -92,7 +103,10 @@ const Give = () => {
                 Give your tithe as an act of obedience and worship. The tithe
                 belongs to the Lord (Leviticus 27:30).
               </p>
-              <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={scrollToAccountDetails}
+                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+              >
                 Give Tithe
               </button>
             </div>
@@ -109,7 +123,10 @@ const Give = () => {
                 Give your offering as a free-will gift above your tithe to
                 support special church projects and missions.
               </p>
-              <button className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors">
+              <button 
+                onClick={scrollToAccountDetails}
+                className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors cursor-pointer"
+              >
                 Give Offering
               </button>
             </div>
@@ -126,7 +143,10 @@ const Give = () => {
                 Contribute to specific church building projects, equipment
                 purchases, and community outreach programs.
               </p>
-              <button className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 transition-colors">
+              <button 
+                onClick={scrollToAccountDetails}
+                className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer"
+              >
                 Give to Projects
               </button>
             </div>
@@ -143,7 +163,10 @@ const Give = () => {
                 Support local and international missionary work, evangelism
                 efforts, and church planting initiatives.
               </p>
-              <button className="w-full bg-orange-600 text-white py-3 px-6 rounded-lg hover:bg-orange-700 transition-colors">
+              <button 
+                onClick={scrollToAccountDetails}
+                className="w-full bg-orange-600 text-white py-3 px-6 rounded-lg hover:bg-orange-700 transition-colors cursor-pointer"
+              >
                 Support Missions
               </button>
             </div>
@@ -160,7 +183,10 @@ const Give = () => {
                 Help support church members and community members in need
                 through our welfare and assistance programs.
               </p>
-              <button className="w-full bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition-colors">
+              <button 
+                onClick={scrollToAccountDetails}
+                className="w-full bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
+              >
                 Give to Welfare
               </button>
             </div>
@@ -177,7 +203,10 @@ const Give = () => {
                 Make a general donation to support the overall ministry and
                 operations of our church.
               </p>
-              <button className="w-full bg-yellow-600 text-white py-3 px-6 rounded-lg hover:bg-yellow-700 transition-colors">
+              <button 
+                onClick={scrollToAccountDetails}
+                className="w-full bg-yellow-600 text-white py-3 px-6 rounded-lg hover:bg-yellow-700 transition-colors cursor-pointer"
+              >
                 Donate Now
               </button>
             </div>
@@ -235,11 +264,14 @@ const Give = () => {
         </div>
       </section>
 
-      {/* Account Details */}
-      <section className="py-16 bg-gray-50">
+      {/* Account Details - Added ID for scrolling */}
+      <section id="account-details" className="py-16 bg-gray-50 scroll-mt-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
+          <div className="bg-white p-8 rounded-lg shadow-lg border-2 border-blue-200">
             <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-bank-line text-blue-600 text-2xl"></i>
+              </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 Bank Account Details
               </h2>
@@ -251,13 +283,13 @@ const Give = () => {
               <div className="space-y-4">
                 <div className="flex justify-between py-3 border-b border-gray-200">
                   <span className="font-medium text-gray-700">Bank Name:</span>
-                  <span className="text-gray-900">GTBank</span>
+                  <span className="text-gray-900 font-semibold">GTBank</span>
                 </div>
                 <div className="flex justify-between py-3 border-b border-gray-200">
                   <span className="font-medium text-gray-700">
                     Account Name:
                   </span>
-                  <span className="text-gray-900">
+                  <span className="text-gray-900 font-semibold">
                     RCCG Liberty Christian Center
                   </span>
                 </div>
@@ -265,7 +297,9 @@ const Give = () => {
                   <span className="font-medium text-gray-700">
                     Account Number:
                   </span>
-                  <span className="text-gray-900 font-mono">0013322336</span>
+                  <span className="text-gray-900 font-mono font-bold text-lg text-blue-600">
+                    0013322336
+                  </span>
                 </div>
               </div>
               <div className="space-y-4">
@@ -277,15 +311,64 @@ const Give = () => {
                   <span className="font-medium text-gray-700">Reference:</span>
                   <span className="text-gray-900">Your Name + Purpose</span>
                 </div>
+                <div className="flex justify-between py-3 border-b border-gray-200">
+                  <span className="font-medium text-gray-700">Bank Code:</span>
+                  <span className="text-gray-900 font-mono">058</span>
+                </div>
               </div>
             </div>
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-              <p className="text-blue-800 text-sm">
-                <i className="ri-information-line mr-2"></i>
-                Please include your name and the purpose of giving (Tithe,
-                Offering, etc.) in the payment reference for proper record
-                keeping.
+            
+            {/* Quick Copy Feature */}
+            <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="font-semibold text-green-800 mb-2 flex items-center">
+                <i className="ri-clipboard-line mr-2"></i>
+                Quick Copy Account Details:
+              </h4>
+              <div className="bg-white p-3 rounded border font-mono text-sm">
+                <div className="flex justify-between items-center">
+                  <span>Account Number: 0013322336</span>
+                  <button 
+                    onClick={() => navigator.clipboard.writeText('0013322336')}
+                    className="text-blue-600 hover:text-blue-800 ml-2"
+                    title="Copy account number"
+                  >
+                    <i className="ri-file-copy-line"></i>
+                  </button>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span>Bank: GTBank</span>
+                  <button 
+                    onClick={() => navigator.clipboard.writeText('GTBank')}
+                    className="text-blue-600 hover:text-blue-800 ml-2"
+                    title="Copy bank name"
+                  >
+                    <i className="ri-file-copy-line"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-blue-800 text-sm flex items-start">
+                <i className="ri-information-line mr-2 mt-0.5 flex-shrink-0"></i>
+                <span>
+                  <strong>Important:</strong> Please include your name and the purpose of giving 
+                  (Tithe, Offering, Special Project, etc.) in the payment reference/description 
+                  for proper record keeping. Example: "John Doe - Tithe"
+                </span>
               </p>
+            </div>
+
+            {/* Example Reference Format */}
+            <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <h4 className="font-semibold text-yellow-800 mb-2">Reference Format Examples:</h4>
+              <ul className="text-yellow-700 text-sm space-y-1">
+                <li>• For Tithe: "Your Name - Tithe"</li>
+                <li>• For Offering: "Your Name - Offering"</li>
+                <li>• For Projects: "Your Name - Building Project"</li>
+                <li>• For Missions: "Your Name - Missions"</li>
+                <li>• For Welfare: "Your Name - Welfare"</li>
+              </ul>
             </div>
           </div>
         </div>
