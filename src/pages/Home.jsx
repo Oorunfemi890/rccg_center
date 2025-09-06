@@ -1,23 +1,19 @@
-import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import WelcomeSection from "@/components/WelcomeSection";
 import ServiceTimes from "@/components/ServiceTimes";
 import EventsSection from "@/components/EventsSection";
 import MapSection from "@/components/MapSection";
-import Footer from "@/components/Footer";
 
-const Index = () => {
+const Home = () => {
   return (
-    <div className="bg-gray-50">
-      <Navigation />
+    <>
       <HeroSection />
       <WelcomeSection />
       <ServiceTimes />
       <EventsSection />
       <MapSection />
-      <Footer />
-    </div>
+    </>
   );
 };
 
-export default Index;
+export default Home;

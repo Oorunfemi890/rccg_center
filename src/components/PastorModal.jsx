@@ -55,17 +55,17 @@ RCCG Liberty Christian Center
             </div>
             
             {/* Pastor Image */}
-            <div className="mb-6">
+            <div className="flex justify-center mb-6">
               <img
                 src={pastorData.image}
                 alt={pastorData.name}
-                className="w-full h-64 object-cover rounded-lg shadow-lg"
+                className="w-64 h-64 object-cover rounded-lg shadow-lg"
               />
             </div>
             
             {/* Full Message Text - flows below the image */}
             <div className="prose max-w-none">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                 {pastorData.fullMessage}
               </p>
             </div>
