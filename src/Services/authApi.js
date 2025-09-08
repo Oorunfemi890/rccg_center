@@ -13,6 +13,12 @@ const mockResponse = (data, success = true, message = '') => {
   });
 };
 
+// Helper function to extract admin ID from token
+const getAdminIdFromToken = (token) => {
+  if (!token || !token.startsWith('mock_token_')) return null;
+  return token.split('_')[2];
+};
+
 export const authAPI = {
   // Login admin
   login: async (credentials) => {
@@ -26,10 +32,15 @@ export const authAPI = {
       
       if (admin) {
         const { password: _, ...adminData } = admin; // Remove password from response
+        
+        // Generate token with the correct admin ID
+        const token = `mock_token_${admin.id}_${Date.now()}`;
+        const refreshToken = `mock_refresh_${admin.id}_${Date.now()}`;
+        
         return mockResponse({
           admin: adminData,
-          token: mockAuthData.generateToken(),
-          refreshToken: mockAuthData.generateRefreshToken()
+          token: token,
+          refreshToken: refreshToken
         }, true, 'Login successful');
       } else {
         return mockResponse(null, false, 'Invalid email or password');
@@ -57,7 +68,7 @@ export const authAPI = {
     if (USE_MOCK_DATA) {
       // Simple mock verification - just check if token exists
       if (token && token.startsWith('mock_token_')) {
-        const adminId = token.split('_')[2];
+        const adminId = getAdminIdFromToken(token);
         const admin = mockAuthData.admins.find(a => a.id === adminId);
         
         if (admin) {
@@ -92,17 +103,22 @@ export const authAPI = {
   // Refresh token
   refreshToken: async (refreshToken) => {
     if (USE_MOCK_DATA) {
-      // Mock refresh - generate new tokens
+      // Mock refresh - generate new tokens for the correct user
       if (refreshToken && refreshToken.startsWith('mock_refresh_')) {
         const adminId = refreshToken.split('_')[2];
         const admin = mockAuthData.admins.find(a => a.id === adminId);
         
         if (admin) {
           const { password: _, ...adminData } = admin;
+          
+          // Generate new tokens with the same admin ID
+          const newToken = `mock_token_${admin.id}_${Date.now()}`;
+          const newRefreshToken = `mock_refresh_${admin.id}_${Date.now()}`;
+          
           return mockResponse({
             admin: adminData,
-            token: mockAuthData.generateToken(),
-            refreshToken: mockAuthData.generateRefreshToken()
+            token: newToken,
+            refreshToken: newRefreshToken
           }, true, 'Token refreshed');
         }
       }

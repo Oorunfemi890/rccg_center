@@ -65,11 +65,11 @@ const AdminLayout = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 flex z-40 md:hidden"
+          className="fixed inset-0 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         >
           <div className="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
@@ -77,12 +77,12 @@ const AdminLayout = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 flex flex-col w-64 bg-white border-r border-gray-200 transform ${
+      <div className={`fixed inset-y-0 left-0 flex flex-col w-64 bg-white border-r border-gray-200 transform z-50 md:relative md:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:inset-0 z-50`}>
+      } transition-transform duration-200 ease-in-out`}>
         
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 bg-blue-600 text-white">
+        <div className="flex items-center justify-between h-16 px-4 bg-blue-600 text-white flex-shrink-0">
           <Link to="/" className="flex items-center">
             <img src="/img/favicon.png" alt="RCCG Logo" className="h-8 w-8" />
             <span className="ml-2 text-lg font-semibold">RCCG LCC</span>
@@ -124,7 +124,7 @@ const AdminLayout = () => {
                 <img 
                   src={admin.avatar} 
                   alt={admin.name} 
-                  className="h-8 w-8 rounded-full"
+                  className="h-8 w-8 rounded-full object-cover"
                 />
               ) : (
                 <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -145,9 +145,9 @@ const AdminLayout = () => {
       </div>
 
       {/* Main content */}
-      <div className="md:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Top navigation */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center px-4 sm:px-6 lg:px-8 h-16">
             {/* Mobile menu button */}
             <button
@@ -181,7 +181,7 @@ const AdminLayout = () => {
                     <img 
                       src={admin.avatar} 
                       alt={admin.name} 
-                      className="h-8 w-8 rounded-full"
+                      className="h-8 w-8 rounded-full object-cover"
                     />
                   ) : (
                     <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
