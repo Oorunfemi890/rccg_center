@@ -80,10 +80,16 @@ const Layout = ({ children }) => {
                 </Link>
               </div>
             </div>
-            <div className="hidden md:flex items-center">
+            <div className="hidden md:flex items-center space-x-4">
               <Link to="/celebrate">
                 <button className="bg-primary text-white px-6 py-2 text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors">
                   Celebrate Me
+                </button>
+              </Link>
+              <Link to="/login">
+                <button className="bg-gray-100 text-gray-700 px-6 py-2 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors flex items-center">
+                  <i className="ri-admin-line mr-2"></i>
+                  Admin Sign In
                 </button>
               </Link>
             </div>
@@ -151,10 +157,18 @@ const Layout = ({ children }) => {
               >
                 Contact
               </Link>
-              <div className="px-4 py-4">
+              
+              {/* Mobile Action Buttons */}
+              <div className="px-4 py-4 space-y-3 border-t border-gray-200 mt-4">
                 <Link to="/celebrate" onClick={closeMobileMenu}>
                   <button className="w-full bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors">
                     Celebrate Me
+                  </button>
+                </Link>
+                <Link to="/login" onClick={closeMobileMenu}>
+                  <button className="w-full bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center">
+                    <i className="ri-admin-line mr-2"></i>
+                    Admin Sign In
                   </button>
                 </Link>
               </div>
