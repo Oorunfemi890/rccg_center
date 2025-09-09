@@ -1,3 +1,4 @@
+// src/Services/apiClient.js - Production Ready
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -43,22 +44,28 @@ apiClient.interceptors.response.use(
         const refreshToken = localStorage.getItem('churchAdminRefreshToken');
         
         if (refreshToken) {
-          const response = await axios.post(`${BASE_URL}/auth/refresh`, {
-            refreshToken: refreshToken
+          // Send refresh token in Authorization header
+          const response = await axios.post(`${BASE_URL}/auth/refresh`, {}, {
+            headers: {
+              'Authorization': `Bearer ${refreshToken}`,
+              'Content-Type': 'application/json'
+            }
           });
 
           if (response.data.success) {
-            const { token, refreshToken: newRefreshToken } = response.data.data;
+            // Use correct property names from backend response
+            const { accessToken } = response.data.data;
             
-            localStorage.setItem('churchAdminToken', token);
-            localStorage.setItem('churchAdminRefreshToken', newRefreshToken);
+            localStorage.setItem('churchAdminToken', accessToken);
+            // Keep the same refresh token
             
-            // Retry the original request
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+            // Retry the original request with new token
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             return apiClient(originalRequest);
           }
         }
       } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
         // Refresh failed, logout user
         localStorage.removeItem('churchAdminToken');
         localStorage.removeItem('churchAdminRefreshToken');

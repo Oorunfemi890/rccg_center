@@ -1,60 +1,28 @@
+// src/Services/authApi.js - Production Ready
 import { apiClient } from './apiClient';
-import { mockAuthData } from '@/data/mockAuthData';
-
-// Mock mode flag - set to false for production
-const USE_MOCK_DATA = true;
-
-// Helper function for mock responses
-const mockResponse = (data, success = true, message = '') => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ success, data, message });
-    }, 1000);
-  });
-};
-
-// Helper function to extract admin ID from token
-const getAdminIdFromToken = (token) => {
-  if (!token || !token.startsWith('mock_token_')) return null;
-  return token.split('_')[2];
-};
 
 export const authAPI = {
   // Login admin
   login: async (credentials) => {
-    if (USE_MOCK_DATA) {
-      const { email, password } = credentials;
-      
-      // Check mock data
-      const admin = mockAuthData.admins.find(
-        admin => admin.email === email && admin.password === password
-      );
-      
-      if (admin) {
-        const { password: _, ...adminData } = admin; // Remove password from response
-        
-        // Generate token with the correct admin ID
-        const token = `mock_token_${admin.id}_${Date.now()}`;
-        const refreshToken = `mock_refresh_${admin.id}_${Date.now()}`;
-        
-        return mockResponse({
-          admin: adminData,
-          token: token,
-          refreshToken: refreshToken
-        }, true, 'Login successful');
-      } else {
-        return mockResponse(null, false, 'Invalid email or password');
-      }
-    }
-
-    // Production API call
     try {
       const response = await apiClient.post('/auth/login', credentials);
-      return {
-        success: true,
-        data: response.data,
-        message: 'Login successful'
-      };
+      
+      if (response.data.success) {
+        return {
+          success: true,
+          data: {
+            admin: response.data.data.admin,
+            token: response.data.data.accessToken,
+            refreshToken: response.data.data.refreshToken
+          },
+          message: response.data.message || 'Login successful'
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.message || 'Login failed'
+        };
+      }
     } catch (error) {
       return {
         success: false,
@@ -65,33 +33,26 @@ export const authAPI = {
 
   // Verify token
   verifyToken: async (token) => {
-    if (USE_MOCK_DATA) {
-      // Simple mock verification - just check if token exists
-      if (token && token.startsWith('mock_token_')) {
-        const adminId = getAdminIdFromToken(token);
-        const admin = mockAuthData.admins.find(a => a.id === adminId);
-        
-        if (admin) {
-          const { password: _, ...adminData } = admin;
-          return mockResponse({
-            admin: adminData,
-            valid: true
-          }, true, 'Token valid');
-        }
-      }
-      
-      return mockResponse(null, false, 'Invalid token');
-    }
-
     try {
       const response = await apiClient.get('/auth/verify', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      return {
-        success: true,
-        data: response.data,
-        message: 'Token valid'
-      };
+      
+      if (response.data.success) {
+        return {
+          success: true,
+          data: {
+            admin: response.data.data.admin,
+            valid: true
+          },
+          message: 'Token valid'
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.message || 'Token verification failed'
+        };
+      }
     } catch (error) {
       return {
         success: false,
@@ -102,39 +63,29 @@ export const authAPI = {
 
   // Refresh token
   refreshToken: async (refreshToken) => {
-    if (USE_MOCK_DATA) {
-      // Mock refresh - generate new tokens for the correct user
-      if (refreshToken && refreshToken.startsWith('mock_refresh_')) {
-        const adminId = refreshToken.split('_')[2];
-        const admin = mockAuthData.admins.find(a => a.id === adminId);
-        
-        if (admin) {
-          const { password: _, ...adminData } = admin;
-          
-          // Generate new tokens with the same admin ID
-          const newToken = `mock_token_${admin.id}_${Date.now()}`;
-          const newRefreshToken = `mock_refresh_${admin.id}_${Date.now()}`;
-          
-          return mockResponse({
-            admin: adminData,
-            token: newToken,
-            refreshToken: newRefreshToken
-          }, true, 'Token refreshed');
-        }
-      }
-      
-      return mockResponse(null, false, 'Invalid refresh token');
-    }
-
     try {
-      const response = await apiClient.post('/auth/refresh', {
-        refreshToken: refreshToken
+      const response = await apiClient.post('/auth/refresh', {}, {
+        headers: {
+          'Authorization': `Bearer ${refreshToken}`
+        }
       });
-      return {
-        success: true,
-        data: response.data,
-        message: 'Token refreshed'
-      };
+
+      if (response.data.success) {
+        return {
+          success: true,
+          data: {
+            admin: response.data.data.admin,
+            token: response.data.data.accessToken,
+            refreshToken: refreshToken
+          },
+          message: 'Token refreshed'
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.message || 'Token refresh failed'
+        };
+      }
     } catch (error) {
       return {
         success: false,
@@ -145,13 +96,11 @@ export const authAPI = {
 
   // Logout
   logout: async (refreshToken) => {
-    if (USE_MOCK_DATA) {
-      return mockResponse({}, true, 'Logged out successfully');
-    }
-
     try {
-      await apiClient.post('/auth/logout', {
-        refreshToken: refreshToken
+      await apiClient.post('/auth/logout', {}, {
+        headers: {
+          'Authorization': `Bearer ${refreshToken}`
+        }
       });
       return {
         success: true,
@@ -167,26 +116,6 @@ export const authAPI = {
 
   // Update profile
   updateProfile: async (profileData) => {
-    if (USE_MOCK_DATA) {
-      // Mock update - find admin and update data
-      const adminIndex = mockAuthData.admins.findIndex(a => a.id === profileData.id);
-      
-      if (adminIndex !== -1) {
-        mockAuthData.admins[adminIndex] = { 
-          ...mockAuthData.admins[adminIndex], 
-          ...profileData,
-          updatedAt: new Date().toISOString()
-        };
-        
-        const { password: _, ...adminData } = mockAuthData.admins[adminIndex];
-        return mockResponse({
-          admin: adminData
-        }, true, 'Profile updated successfully');
-      }
-      
-      return mockResponse(null, false, 'Admin not found');
-    }
-
     try {
       const response = await apiClient.put('/auth/profile', profileData);
       return {
@@ -204,26 +133,6 @@ export const authAPI = {
 
   // Change password
   changePassword: async (passwordData) => {
-    if (USE_MOCK_DATA) {
-      const { currentPassword, newPassword, adminId } = passwordData;
-      const adminIndex = mockAuthData.admins.findIndex(a => a.id === adminId);
-      
-      if (adminIndex !== -1) {
-        const admin = mockAuthData.admins[adminIndex];
-        
-        if (admin.password === currentPassword) {
-          mockAuthData.admins[adminIndex].password = newPassword;
-          mockAuthData.admins[adminIndex].updatedAt = new Date().toISOString();
-          
-          return mockResponse({}, true, 'Password changed successfully');
-        } else {
-          return mockResponse(null, false, 'Current password is incorrect');
-        }
-      }
-      
-      return mockResponse(null, false, 'Admin not found');
-    }
-
     try {
       await apiClient.put('/auth/change-password', passwordData);
       return {
