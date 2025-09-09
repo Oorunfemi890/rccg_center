@@ -1,32 +1,62 @@
-// src/Services/authApi.js - Production Ready
+// src/Services/authAPI.js - Production Ready with Backend Integration
 import { apiClient } from './apiClient';
 
 export const authAPI = {
   // Login admin
   login: async (credentials) => {
     try {
-      const response = await apiClient.post('/auth/login', credentials);
+      const response = await apiClient.post('/auth/login', {
+        email: credentials.email,
+        password: credentials.password
+      });
       
-      if (response.data.success) {
-        return {
-          success: true,
-          data: {
-            admin: response.data.data.admin,
-            token: response.data.data.accessToken,
-            refreshToken: response.data.data.refreshToken
-          },
-          message: response.data.message || 'Login successful'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || 'Login failed'
-        };
+      // Handle different response structures
+      if (response.data) {
+        // Check if response has success field or assume success if we get data
+        const isSuccess = response.data.success !== false && (response.data.success || response.data.data || response.data.user);
+        
+        if (isSuccess) {
+          // Extract data from different possible structures
+          const responseData = response.data.data || response.data;
+          
+          return {
+            success: true,
+            data: {
+              admin: responseData.user || responseData.admin || responseData,
+              accessToken: responseData.accessToken || responseData.token,
+              token: responseData.accessToken || responseData.token,
+              refreshToken: responseData.refreshToken,
+              user: responseData.user || responseData.admin || responseData
+            },
+            message: response.data.message || 'Login successful'
+          };
+        }
       }
-    } catch (error) {
+      
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed'
+        message: response.data?.message || 'Login failed'
+      };
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      // Handle different error structures
+      let errorMessage = 'Login failed';
+      
+      if (error.response?.data) {
+        errorMessage = error.response.data.message || 
+                     error.response.data.error || 
+                     (Array.isArray(error.response.data.errors) ? 
+                       error.response.data.errors.join(', ') : 
+                       errorMessage);
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      return {
+        success: false,
+        message: errorMessage,
+        error: error
       };
     }
   },
@@ -38,25 +68,34 @@ export const authAPI = {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (response.data.success) {
-        return {
-          success: true,
-          data: {
-            admin: response.data.data.admin,
-            valid: true
-          },
-          message: 'Token valid'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || 'Token verification failed'
-        };
+      if (response.data) {
+        const isSuccess = response.data.success !== false;
+        
+        if (isSuccess) {
+          const responseData = response.data.data || response.data;
+          
+          return {
+            success: true,
+            data: {
+              admin: responseData.user || responseData.admin || responseData,
+              user: responseData.user || responseData.admin || responseData,
+              valid: true
+            },
+            message: response.data.message || 'Token valid'
+          };
+        }
       }
-    } catch (error) {
+      
       return {
         success: false,
-        message: error.response?.data?.message || 'Token verification failed'
+        message: response.data?.message || 'Token verification failed'
+      };
+    } catch (error) {
+      console.error('Token verification error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Token verification failed'
       };
     }
   },
@@ -66,30 +105,41 @@ export const authAPI = {
     try {
       const response = await apiClient.post('/auth/refresh', {}, {
         headers: {
-          'Authorization': `Bearer ${refreshToken}`
+          'Authorization': `Bearer ${refreshToken}`,
+          'Content-Type': 'application/json'
         }
       });
 
-      if (response.data.success) {
-        return {
-          success: true,
-          data: {
-            admin: response.data.data.admin,
-            token: response.data.data.accessToken,
-            refreshToken: refreshToken
-          },
-          message: 'Token refreshed'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || 'Token refresh failed'
-        };
+      if (response.data) {
+        const isSuccess = response.data.success !== false;
+        
+        if (isSuccess) {
+          const responseData = response.data.data || response.data;
+          
+          return {
+            success: true,
+            data: {
+              admin: responseData.user || responseData.admin,
+              user: responseData.user || responseData.admin,
+              accessToken: responseData.accessToken || responseData.token,
+              token: responseData.accessToken || responseData.token,
+              refreshToken: responseData.refreshToken || refreshToken
+            },
+            message: response.data.message || 'Token refreshed successfully'
+          };
+        }
       }
-    } catch (error) {
+
       return {
         success: false,
-        message: error.response?.data?.message || 'Token refresh failed'
+        message: response.data?.message || 'Token refresh failed'
+      };
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Token refresh failed'
       };
     }
   },
@@ -97,19 +147,23 @@ export const authAPI = {
   // Logout
   logout: async (refreshToken) => {
     try {
-      await apiClient.post('/auth/logout', {}, {
+      const response = await apiClient.post('/auth/logout', {}, {
         headers: {
           'Authorization': `Bearer ${refreshToken}`
         }
       });
+      
+      return {
+        success: true,
+        message: response.data?.message || 'Logged out successfully'
+      };
+    } catch (error) {
+      console.error('Logout error:', error);
+      
+      // Don't fail logout on API error - always return success for logout
       return {
         success: true,
         message: 'Logged out successfully'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Logout failed'
       };
     }
   },
@@ -117,16 +171,52 @@ export const authAPI = {
   // Update profile
   updateProfile: async (profileData) => {
     try {
-      const response = await apiClient.put('/auth/profile', profileData);
-      return {
-        success: true,
-        data: response.data,
-        message: 'Profile updated successfully'
-      };
-    } catch (error) {
+      const response = await apiClient.put('/auth/profile', {
+        name: profileData.name,
+        email: profileData.email,
+        phone: profileData.phone,
+        position: profileData.position
+      });
+      
+      if (response.data) {
+        const isSuccess = response.data.success !== false;
+        
+        if (isSuccess) {
+          const responseData = response.data.data || response.data;
+          
+          return {
+            success: true,
+            data: {
+              admin: responseData.user || responseData.admin || responseData,
+              user: responseData.user || responseData.admin || responseData
+            },
+            message: response.data.message || 'Profile updated successfully'
+          };
+        }
+      }
+      
       return {
         success: false,
-        message: error.response?.data?.message || 'Profile update failed'
+        message: response.data?.message || 'Profile update failed'
+      };
+    } catch (error) {
+      console.error('Profile update error:', error);
+      
+      let errorMessage = 'Profile update failed';
+      
+      if (error.response?.data) {
+        errorMessage = error.response.data.message || 
+                     error.response.data.error ||
+                     (Array.isArray(error.response.data.errors) ? 
+                       error.response.data.errors.join(', ') : 
+                       errorMessage);
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      return {
+        success: false,
+        message: errorMessage
       };
     }
   },
@@ -134,15 +224,112 @@ export const authAPI = {
   // Change password
   changePassword: async (passwordData) => {
     try {
-      await apiClient.put('/auth/change-password', passwordData);
+      const response = await apiClient.put('/auth/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      
       return {
         success: true,
-        message: 'Password changed successfully'
+        message: response.data?.message || 'Password changed successfully'
       };
     } catch (error) {
+      console.error('Password change error:', error);
+      
+      let errorMessage = 'Password change failed';
+      
+      if (error.response?.data) {
+        errorMessage = error.response.data.message || 
+                     error.response.data.error ||
+                     (Array.isArray(error.response.data.errors) ? 
+                       error.response.data.errors.join(', ') : 
+                       errorMessage);
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       return {
         success: false,
-        message: error.response?.data?.message || 'Password change failed'
+        message: errorMessage
+      };
+    }
+  },
+
+  // Get admin profile
+  getProfile: async () => {
+    try {
+      const response = await apiClient.get('/auth/me');
+      
+      if (response.data) {
+        const isSuccess = response.data.success !== false;
+        
+        if (isSuccess) {
+          const responseData = response.data.data || response.data;
+          
+          return {
+            success: true,
+            data: {
+              admin: responseData.user || responseData.admin || responseData,
+              user: responseData.user || responseData.admin || responseData
+            },
+            message: response.data.message || 'Profile retrieved successfully'
+          };
+        }
+      }
+      
+      return {
+        success: false,
+        message: response.data?.message || 'Failed to get profile'
+      };
+    } catch (error) {
+      console.error('Get profile error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Failed to get profile'
+      };
+    }
+  },
+
+  // Request password reset
+  requestPasswordReset: async (email) => {
+    try {
+      const response = await apiClient.post('/auth/forgot-password', {
+        email: email
+      });
+      
+      return {
+        success: true,
+        message: response.data?.message || 'Password reset email sent'
+      };
+    } catch (error) {
+      console.error('Password reset request error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Failed to request password reset'
+      };
+    }
+  },
+
+  // Reset password with token
+  resetPassword: async (token, newPassword) => {
+    try {
+      const response = await apiClient.post('/auth/reset-password', {
+        token: token,
+        newPassword: newPassword
+      });
+      
+      return {
+        success: true,
+        message: response.data?.message || 'Password reset successfully'
+      };
+    } catch (error) {
+      console.error('Password reset error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Failed to reset password'
       };
     }
   }

@@ -12,7 +12,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const { login, loading, isAuthenticated } = useAuth();
+  const { login, loading, isAuthenticated, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,6 +23,13 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
+
+  // Clear form errors when auth error changes
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -64,38 +71,56 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Clear previous errors
+    setErrors({});
+    
     if (!validateForm()) {
-      toast.error('Please fix the errors below');
       return;
     }
 
-    const result = await login({
-      email: formData.email,
-      password: formData.password
-    });
+    try {
+      const result = await login({
+        email: formData.email.trim(),
+        password: formData.password
+      });
 
-    if (result.success) {
-      // Remember me functionality
-      if (formData.rememberMe) {
-        localStorage.setItem('rememberedEmail', formData.email);
-      } else {
-        localStorage.removeItem('rememberedEmail');
+      if (result.success) {
+        // Remember me functionality
+        if (formData.rememberMe) {
+          try {
+            localStorage.setItem('rememberedEmail', formData.email);
+          } catch (e) {
+            console.warn('Could not save remembered email');
+          }
+        } else {
+          try {
+            localStorage.removeItem('rememberedEmail');
+          } catch (e) {
+            console.warn('Could not remove remembered email');
+          }
+        }
+
+        const from = location.state?.from?.pathname || '/admin/dashboard';
+        navigate(from, { replace: true });
       }
-
-      const from = location.state?.from?.pathname || '/admin/dashboard';
-      navigate(from, { replace: true });
+    } catch (error) {
+      console.error('Login error:', error);
     }
   };
 
   // Load remembered email on component mount
   useEffect(() => {
-    const rememberedEmail = localStorage.getItem('rememberedEmail');
-    if (rememberedEmail) {
-      setFormData(prev => ({
-        ...prev,
-        email: rememberedEmail,
-        rememberMe: true
-      }));
+    try {
+      const rememberedEmail = localStorage.getItem('rememberedEmail');
+      if (rememberedEmail) {
+        setFormData(prev => ({
+          ...prev,
+          email: rememberedEmail,
+          rememberMe: true
+        }));
+      }
+    } catch (e) {
+      console.warn('Could not load remembered email');
     }
   }, []);
 
@@ -136,6 +161,7 @@ const Login = () => {
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   } rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                   placeholder="Enter your email address"
+                  disabled={loading}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <i className={`ri-mail-line text-gray-400 ${errors.email ? 'text-red-400' : ''}`}></i>
@@ -166,11 +192,13 @@ const Login = () => {
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   } rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                   placeholder="Enter your password"
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
                 >
                   <i className={`${showPassword ? 'ri-eye-off-line' : 'ri-eye-line'} text-gray-400 hover:text-gray-600`}></i>
                 </button>
@@ -193,6 +221,7 @@ const Login = () => {
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  disabled={loading}
                 />
                 <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">
                   Remember me
@@ -200,9 +229,12 @@ const Login = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                <Link 
+                  to="/forgot-password" 
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
                   Forgot password?
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -233,6 +265,20 @@ const Login = () => {
               <div className="text-xs text-gray-600 space-y-1">
                 <p><strong>Super Admin:</strong> admin@rccglcc.org / admin123</p>
                 <p><strong>Admin:</strong> sarah@rccglcc.org / sarah123</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      email: 'admin@rccglcc.org',
+                      password: 'admin123'
+                    }));
+                  }}
+                  className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
+                  disabled={loading}
+                >
+                  Use Super Admin credentials
+                </button>
               </div>
             </div>
           </form>
