@@ -1,4 +1,4 @@
-// src/Services/authAPI.js - Production Ready with Backend Integration
+// src/Services/authAPI.js - Production Ready with localStorage
 import { apiClient } from './apiClient';
 
 export const authAPI = {
@@ -149,7 +149,7 @@ export const authAPI = {
     try {
       const response = await apiClient.post('/auth/logout', {}, {
         headers: {
-          'Authorization': `Bearer ${refreshToken}`
+          'Authorization': `Bearer ${refreshToken || localStorage.getItem('churchAdminRefreshToken')}`
         }
       });
       
