@@ -137,7 +137,7 @@ apiClient.interceptors.response.use(
           }
         }
 
-        throw new Error("No valid refresh token or refresh failed");
+        throw new Error("No valid user for this email or password");
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
 
