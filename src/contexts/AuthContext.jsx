@@ -42,6 +42,16 @@ const authReducer = (state, action) => {
         refreshToken: action.payload.refreshToken,
         admin: action.payload.admin || state.admin,
       };
+    case "SET_PROFILE_UPDATE_STATUS":
+      return {
+        ...state,
+        profileUpdateStatus: action.payload
+      };
+    case "SET_PASSWORD_CHANGE_STATUS":
+      return {
+        ...state,
+        passwordChangeStatus: action.payload
+      };
     default:
       return state;
   }
@@ -55,6 +65,8 @@ const initialState = {
   refreshToken: null,
   loading: true, // Start with loading true for initial auth check
   error: null,
+  profileUpdateStatus: null, // 'requesting', 'pending', 'verified', 'failed'
+  passwordChangeStatus: null, // 'requesting', 'pending', 'verified', 'failed'
 };
 
 export const AuthProvider = ({ children }) => {
@@ -166,6 +178,19 @@ export const AuthProvider = ({ children }) => {
     };
   }, [state.isAuthenticated, state.token, state.refreshToken]);
 
+  // Listen for auth logout events (from apiClient)
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      logout(false);
+    };
+
+    window.addEventListener('auth:logout', handleAuthLogout);
+    
+    return () => {
+      window.removeEventListener('auth:logout', handleAuthLogout);
+    };
+  }, []);
+
   const login = async (credentials) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
@@ -228,6 +253,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Request profile update token
+  const requestProfileUpdate = async (type = 'email') => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'requesting' });
+
+      const response = await authAPI.requestProfileUpdate(type);
+
+      if (response.success) {
+        dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'pending' });
+        toast.success(response.message || "Verification token sent to your email");
+        return { success: true };
+      } else {
+        dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'failed' });
+        toast.error(response.message);
+        return { success: false, message: response.message };
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to request profile update";
+      dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'failed' });
+      toast.error(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  };
+
+  // Update profile with token verification
   const updateProfile = async (profileData) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
@@ -242,7 +298,16 @@ export const AuthProvider = ({ children }) => {
           type: "UPDATE_PROFILE",
           payload: updatedAdmin,
         });
+        
+        dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'verified' });
+        
         toast.success(response.message || "Profile updated successfully!");
+        
+        // Clear status after a delay
+        setTimeout(() => {
+          dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: null });
+        }, 3000);
+        
         return { success: true, data: response.data };
       } else {
         const error = response.message || "Profile update failed";
@@ -261,22 +326,85 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Verify profile update token
+  const verifyProfileToken = async (token) => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+
+      const response = await authAPI.verifyProfileToken(token);
+
+      if (response.success) {
+        dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'verified' });
+        return { success: true, data: response.data };
+      } else {
+        dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'failed' });
+        return { success: false, message: response.message };
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Token verification failed";
+      dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'failed' });
+      return { success: false, message: errorMessage };
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  };
+
+  // Request password change token
+  const requestPasswordChange = async (currentPassword) => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'requesting' });
+
+      const response = await authAPI.requestPasswordChange(currentPassword);
+
+      if (response.success) {
+        dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'pending' });
+        toast.success(response.message || "Password change verification token sent");
+        return { success: true };
+      } else {
+        dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'failed' });
+        toast.error(response.message);
+        return { success: false, message: response.message };
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to request password change";
+      dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'failed' });
+      toast.error(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  };
+
+  // Change password with token verification
   const changePassword = async (passwordData) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
 
       const response = await authAPI.changePassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
+        token: passwordData.token,
+        newPassword: passwordData.newPassword
       });
 
       if (response.success) {
+        dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'verified' });
         toast.success(response.message || "Password changed successfully!");
+        
         // Clear tokens to force re-login with new password
-        logout(false);
+        setTimeout(() => {
+          logout(false);
+        }, 2000);
+        
         return { success: true };
       } else {
         const error = response.message || "Password change failed";
+        dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'failed' });
         toast.error(error);
         return { success: false, message: error };
       }
@@ -285,7 +413,34 @@ export const AuthProvider = ({ children }) => {
         error.response?.data?.message ||
         error.message ||
         "Password change failed";
+      dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'failed' });
       toast.error(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  };
+
+  // Verify password change token
+  const verifyPasswordToken = async (token) => {
+    try {
+      dispatch({ type: "SET_LOADING", payload: true });
+
+      const response = await authAPI.verifyPasswordToken(token);
+
+      if (response.success) {
+        dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'verified' });
+        return { success: true };
+      } else {
+        dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'failed' });
+        return { success: false, message: response.message };
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Token verification failed";
+      dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: 'failed' });
       return { success: false, message: errorMessage };
     } finally {
       dispatch({ type: "SET_LOADING", payload: false });
@@ -304,15 +459,48 @@ export const AuthProvider = ({ children }) => {
     );
   };
 
+  // Refresh profile data
+  const refreshProfile = async () => {
+    try {
+      const response = await authAPI.getProfile();
+      
+      if (response.success && response.data) {
+        const updatedAdmin = response.data.admin || response.data.user;
+        
+        dispatch({
+          type: "UPDATE_PROFILE",
+          payload: updatedAdmin,
+        });
+        
+        return { success: true, data: response.data };
+      }
+      
+      return { success: false, message: response.message };
+    } catch (error) {
+      console.error("Profile refresh failed:", error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || error.message || "Failed to refresh profile" 
+      };
+    }
+  };
+
   const value = {
     ...state,
     login,
     logout,
     updateProfile,
+    requestProfileUpdate,
+    verifyProfileToken,
+    requestPasswordChange,
     changePassword,
+    verifyPasswordToken,
+    refreshProfile,
     getToken,
     getRefreshToken,
     clearError: () => dispatch({ type: "CLEAR_ERROR" }),
+    clearProfileUpdateStatus: () => dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: null }),
+    clearPasswordChangeStatus: () => dispatch({ type: "SET_PASSWORD_CHANGE_STATUS", payload: null }),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

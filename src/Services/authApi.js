@@ -1,4 +1,4 @@
-// src/Services/authAPI.js - Production Ready with localStorage
+// src/Services/authApi.js - Enhanced with profile management
 import { apiClient } from './apiClient';
 
 export const authAPI = {
@@ -168,14 +168,36 @@ export const authAPI = {
     }
   },
 
-  // Update profile
+  // Request profile update token
+  requestProfileUpdate: async (type) => {
+    try {
+      const response = await apiClient.post('/auth/request-profile-update', {
+        type: type // 'email' or 'profile'
+      });
+      
+      return {
+        success: true,
+        message: response.data?.message || 'Verification token sent to your email'
+      };
+    } catch (error) {
+      console.error('Request profile update error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Failed to request profile update'
+      };
+    }
+  },
+
+  // Update profile with token verification
   updateProfile: async (profileData) => {
     try {
       const response = await apiClient.put('/auth/profile', {
         name: profileData.name,
         email: profileData.email,
         phone: profileData.phone,
-        position: profileData.position
+        position: profileData.position,
+        token: profileData.token // Include verification token if provided
       });
       
       if (response.data) {
@@ -221,11 +243,54 @@ export const authAPI = {
     }
   },
 
-  // Change password
+  // Verify profile update token
+  verifyProfileToken: async (token) => {
+    try {
+      const response = await apiClient.post('/auth/verify-profile-token', {
+        token: token
+      });
+      
+      return {
+        success: true,
+        data: response.data?.data,
+        message: response.data?.message || 'Token verified successfully'
+      };
+    } catch (error) {
+      console.error('Verify profile token error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Token verification failed'
+      };
+    }
+  },
+
+  // Request password change token
+  requestPasswordChange: async (currentPassword) => {
+    try {
+      const response = await apiClient.post('/auth/request-password-change', {
+        currentPassword: currentPassword
+      });
+      
+      return {
+        success: true,
+        message: response.data?.message || 'Password change verification token sent to your email'
+      };
+    } catch (error) {
+      console.error('Request password change error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Failed to request password change'
+      };
+    }
+  },
+
+  // Change password with token verification
   changePassword: async (passwordData) => {
     try {
       const response = await apiClient.put('/auth/change-password', {
-        currentPassword: passwordData.currentPassword,
+        token: passwordData.token,
         newPassword: passwordData.newPassword
       });
       
@@ -251,6 +316,27 @@ export const authAPI = {
       return {
         success: false,
         message: errorMessage
+      };
+    }
+  },
+
+  // Verify password change token
+  verifyPasswordToken: async (token) => {
+    try {
+      const response = await apiClient.post('/auth/verify-password-token', {
+        token: token
+      });
+      
+      return {
+        success: true,
+        message: response.data?.message || 'Token verified successfully'
+      };
+    } catch (error) {
+      console.error('Verify password token error:', error);
+      
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Token verification failed'
       };
     }
   },
