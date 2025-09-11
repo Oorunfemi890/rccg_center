@@ -288,6 +288,12 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
 
+      // FIXED: Log the data being sent for debugging
+      console.log('Updating profile with data:', {
+        ...profileData,
+        token: profileData.token ? `${profileData.token.substring(0, 10)}...` : 'none'
+      });
+
       const response = await authAPI.updateProfile(profileData);
 
       if (response.success && response.data) {
@@ -311,14 +317,25 @@ export const AuthProvider = ({ children }) => {
         return { success: true, data: response.data };
       } else {
         const error = response.message || "Profile update failed";
+        dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'failed' });
         toast.error(error);
         return { success: false, message: error };
       }
     } catch (error) {
+      // FIXED: Enhanced error logging and handling
+      console.error('Profile update error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      
       const errorMessage =
         error.response?.data?.message ||
+        error.response?.data?.error ||
         error.message ||
         "Profile update failed";
+      
+      dispatch({ type: "SET_PROFILE_UPDATE_STATUS", payload: 'failed' });
       toast.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {

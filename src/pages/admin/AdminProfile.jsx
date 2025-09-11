@@ -298,17 +298,36 @@ const AdminProfile = () => {
     }
   };
 
+  // FIXED: Enhanced profile verification with better error handling
   const handleProfileVerification = async (token) => {
-    if (!pendingProfileData) return;
+    if (!pendingProfileData) {
+      toast.error('No pending profile data found. Please try again.');
+      return;
+    }
 
     try {
       setVerificationLoading(true);
 
-      const result = await updateProfile({
-        id: admin.id,
-        ...pendingProfileData,
-        token: token
+      // FIXED: Log what we're sending for debugging
+      console.log('Attempting profile verification:', {
+        hasId: !!admin.id,
+        hasName: !!pendingProfileData.name,
+        hasEmail: !!pendingProfileData.email,
+        hasToken: !!token,
+        tokenLength: token?.length,
+        emailChange: pendingProfileData.email !== admin.email
       });
+
+      // FIXED: Ensure we have all required data
+      const updateData = {
+        name: pendingProfileData.name,
+        email: pendingProfileData.email,
+        phone: pendingProfileData.phone,
+        position: pendingProfileData.position,
+        token: token.trim() // Ensure token is trimmed
+      };
+
+      const result = await updateProfile(updateData);
 
       if (result.success) {
         setShowVerificationModal(false);
@@ -316,11 +335,13 @@ const AdminProfile = () => {
         setPendingProfileData(null);
         toast.success('Profile updated successfully! Email address changed.');
       } else {
-        toast.error(result.message);
+        console.error('Profile update failed:', result);
+        toast.error(result.message || 'Profile verification failed');
       }
     } catch (error) {
       console.error('Error verifying profile update:', error);
-      toast.error('Profile verification failed');
+      const errorMessage = error.response?.data?.message || error.message || 'Profile verification failed';
+      toast.error(errorMessage);
     } finally {
       setVerificationLoading(false);
     }
@@ -333,7 +354,7 @@ const AdminProfile = () => {
       setVerificationLoading(true);
 
       const response = await authAPI.changePassword({
-        token: token,
+        token: token.trim(),
         newPassword: pendingPasswordData.newPassword
       });
 
