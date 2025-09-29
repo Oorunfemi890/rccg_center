@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Base URL for your backend API
-const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_BASE_URL || "https://rccg-centre-backend-10.onrender.com/api";
 
 // Create axios instance for public API calls (no auth required)
 const publicApiClient = axios.create({
